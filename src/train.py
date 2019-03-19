@@ -12,8 +12,8 @@ from src.dataloader import get_loaders
 from src.model import PVDM
 
 
-def run(datadir, context_size=4, bsize=32, hid_n=300, lr=0.001, epoch=10,
-        use_cuda=True):
+def run(datadir, savedir, context_size=4, bsize=32, hid_n=300, lr=0.001,
+        epoch=10, use_cuda=True):
 
     datadir = Path(datadir)
 
@@ -36,6 +36,7 @@ def run(datadir, context_size=4, bsize=32, hid_n=300, lr=0.001, epoch=10,
     optimizer = optim.SGD(model.parameters(), lr=lr)
 
     loss_func = nn.CrossEntropyLoss()
+    best_loss = 1e+5
 
     for i_epoch in range(1, epoch + 1):
         losses = []
@@ -54,7 +55,15 @@ def run(datadir, context_size=4, bsize=32, hid_n=300, lr=0.001, epoch=10,
             optimizer.step()
 
             losses.append(loss.item())
-        print('Loss: ', np.mean(losses))
+        mean_loss = np.mean(losses)
+        print('Loss: ', mean_loss)
+
+        if mean_loss < best_loss:
+            best_loss = mean_loss
+            # Dump model
+            model.cpu()
+            torch.save(model.D, savedir)
+            model.to(device)
 
 
 if __name__ == '__main__':
