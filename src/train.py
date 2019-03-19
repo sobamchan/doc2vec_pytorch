@@ -54,7 +54,7 @@ def run(datadir, context_size=4, bsize=32, hid_n=300, lr=0.001, epoch=10,
             optimizer.step()
 
             losses.append(loss.item())
-        print(':oss: ', np.mean(losses))
+        print('Loss: ', np.mean(losses))
 
 
 if __name__ == '__main__':
