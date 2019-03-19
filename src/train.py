@@ -17,8 +17,10 @@ def run(datadir, savedir, context_size=4, bsize=32, hid_n=300, lr=0.001,
         epoch=10, use_cuda=True, use_tb=True):
 
     datadir = Path(datadir)
+    savedir = Path(savedir)
+
     if use_tb:
-        tb = SummaryWriter(savedir)
+        tb = SummaryWriter(str(savedir))
 
     t2i, words = pickle.load(open(datadir / 'vocab.pkl', 'rb'))
     dataset = pickle.load(open(datadir / 'dataset.token.pkl', 'rb'))
