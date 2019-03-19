@@ -5,13 +5,6 @@ import torch.utils.data as data
 from torch.utils.data.sampler import RandomSampler
 
 
-# def collate_fn(batch):
-#     for sample in batch:
-#         for k, v in sample.items():
-#             sample[k] = torch.tensor(v)
-#     return batch
-
-
 def collate_fn(batch):
     doc_ids = []
     contexts = []
