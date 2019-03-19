@@ -1,4 +1,3 @@
-import pickle
 import random
 
 import torch
@@ -6,11 +5,27 @@ import torch.utils.data as data
 from torch.utils.data.sampler import RandomSampler
 
 
+# def collate_fn(batch):
+#     for sample in batch:
+#         for k, v in sample.items():
+#             sample[k] = torch.tensor(v)
+#     return batch
+
+
 def collate_fn(batch):
+    doc_ids = []
+    contexts = []
+    targets = []
+
     for sample in batch:
-        for k, v in sample.items():
-            sample[k] = torch.tensor(v)
-    return batch
+        doc_ids.append(sample['doc_id'])
+        contexts.append(sample['context'])
+        targets.append(sample['target'])
+    return (
+            torch.LongTensor(doc_ids),
+            torch.LongTensor(contexts),
+            torch.LongTensor(targets)
+            )
 
 
 class Dataset(data.Dataset):
@@ -44,9 +59,7 @@ class Dataset(data.Dataset):
                 }
 
 
-def get_loaders(dataset_path, context_size, pad_index, bsize):
-    ds = pickle.load(open(dataset_path, 'rb'))
-
+def get_loaders(ds, context_size, pad_index, bsize):
     dataset = Dataset(ds, context_size, pad_index)
     return data.DataLoader(
             dataset,
