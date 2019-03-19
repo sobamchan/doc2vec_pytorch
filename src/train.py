@@ -1,13 +1,20 @@
 from pathlib import Path
 import pickle
 
+import numpy as np
 import fire
+import torch
+import torch.nn as nn
+import torch.optim as optim
 
 from src.data import PAD_TOKEN
 from src.dataloader import get_loaders
+from src.model import PVDM
 
 
-def run(datadir, context_size=4, bsize=32):
+def run(datadir, context_size=4, bsize=32, hid_n=300, lr=0.001, epoch=10,
+        use_cuda=True):
+
     datadir = Path(datadir)
 
     t2i, words = pickle.load(open(datadir / 'vocab.pkl', 'rb'))
@@ -15,8 +22,39 @@ def run(datadir, context_size=4, bsize=32):
 
     dataloader = get_loaders(dataset, context_size, t2i[PAD_TOKEN], bsize)
 
-    for batch in dataloader:
-        print(batch)
+    voc_n = len(t2i)
+    doc_n = len(dataset)
+
+    device = torch.device('cuda' if use_cuda else 'cpu')
+
+    print('Voc n:', voc_n)
+    print('Doc n:', doc_n)
+    print('Device: ', device)
+
+    model = PVDM(voc_n, doc_n, hid_n)
+    model = model.to(device)
+    optimizer = optim.SGD(model.parameters(), lr=lr)
+
+    loss_func = nn.CrossEntropyLoss()
+
+    for i_epoch in range(1, epoch + 1):
+        losses = []
+        for doc_ids, contexts, targets in dataloader:
+            # doc_ids -> [B]
+            # contexts -> [B, context_size]
+            # targets -> [B]
+            doc_ids = doc_ids.to(device)
+            contexts = contexts.to(device)
+            targets = targets.to(device)
+
+            optimizer.zero_grad()
+            y = model(doc_ids, contexts)  # [B, V]
+            loss = loss_func(y, targets)
+            loss.backward()
+            optimizer.step()
+
+            losses.append(loss.item())
+        print(':oss: ', np.mean(losses))
 
 
 if __name__ == '__main__':
