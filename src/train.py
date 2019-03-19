@@ -8,6 +8,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+import lineflow as lf
+
 from src.data import PAD_TOKEN
 from src.dataloader import get_loaders
 from src.model import PVDM
@@ -25,7 +27,7 @@ def run(datadir, savedir, context_size=4, bsize=32, hid_n=300, lr=0.001,
 
     # Load dataset (Already tokenized)
     t2i, words = pickle.load(open(datadir / 'vocab.pkl', 'rb'))
-    dataset = pickle.load(open(datadir / 'dataset.token.pkl', 'rb'))
+    dataset = lf.Dataset.load(datadir / 'dataset.token.pkl')
 
     # Prepare pytorch dataloader
     dataloader = get_loaders(dataset, context_size, t2i[PAD_TOKEN], bsize)
@@ -69,8 +71,8 @@ def run(datadir, savedir, context_size=4, bsize=32, hid_n=300, lr=0.001,
         # Tensorboard logging
         if use_tb:
             tb.add_scalar(
-                    'train/loss', mean_loss, i_epoch
-                    )
+                'train/loss', mean_loss, i_epoch
+            )
 
         # Make checkpoints
         if mean_loss < best_loss:
