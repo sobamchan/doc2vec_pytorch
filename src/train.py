@@ -3,6 +3,7 @@ import pickle
 
 import numpy as np
 import fire
+from tensorboardX import SummaryWriter
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -13,9 +14,11 @@ from src.model import PVDM
 
 
 def run(datadir, savedir, context_size=4, bsize=32, hid_n=300, lr=0.001,
-        epoch=10, use_cuda=True):
+        epoch=10, use_cuda=True, use_tb=True):
 
     datadir = Path(datadir)
+    if use_tb:
+        tb = SummaryWriter(savedir)
 
     t2i, words = pickle.load(open(datadir / 'vocab.pkl', 'rb'))
     dataset = pickle.load(open(datadir / 'dataset.token.pkl', 'rb'))
@@ -58,11 +61,17 @@ def run(datadir, savedir, context_size=4, bsize=32, hid_n=300, lr=0.001,
         mean_loss = np.mean(losses)
         print('Loss: ', mean_loss)
 
+        if use_tb:
+            tb.add_scalar(
+                    'train/loss', mean_loss, i_epoch
+                    )
+
         if mean_loss < best_loss:
             best_loss = mean_loss
             # Dump model
             model.cpu()
-            torch.save(model.D, savedir)
+            with open(savedir / 'D.pth', 'wb') as f:
+                pickle.dump(model.D, f)
             model.to(device)
 
 
