@@ -51,6 +51,7 @@ def run(datadir, savedir, context_size=4, bsize=32, hid_n=300, lr=0.001,
     for i_epoch in range(1, epoch + 1):
         losses = []
         for doc_ids, contexts, targets in dataloader:
+            # Send to GPU
             doc_ids = doc_ids.to(device)  # [B]
             contexts = contexts.to(device)  # [B, context_size]
             targets = targets.to(device)  # [B]
