@@ -80,6 +80,8 @@ def run(datadir, savedir, context_size=4, bsize=32, hid_n=300, lr=0.001,
             model.cpu()
             with open(savedir / 'D.pth', 'wb') as f:
                 pickle.dump(model.D, f)
+            with open(savedir / 'W.pth', 'wb') as f:
+                pickle.dump(model.W, f)
             model.to(device)
 
 

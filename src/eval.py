@@ -24,5 +24,17 @@ def most_similar(datadir, textpath, modelpath, doc_id, topn=5):
     print(np.array(docs)[sims[:topn]])
 
 
+def most_similar_word(vocabpath, modelpath, word_id, topn=5):
+    vocabpath = Path(vocabpath)
+    modelpath = Path(modelpath)
+
+    _, words = pickle.load(open(vocabpath, 'rb'))
+    W = pickle.load(open(modelpath, 'rb')).data.numpy()
+
+    base_vec = np.expand_dims(W[word_id], axis=0)
+    sims = np.argsort(cosine_similarity(base_vec, W)[0])[::-1]
+    print(np.array(words)[sims[:topn]])
+
+
 if __name__ == '__main__':
     fire.Fire()
