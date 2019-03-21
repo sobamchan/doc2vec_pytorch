@@ -17,10 +17,10 @@ END_TOKEN = '</s>'
 
 def preprocess(sent):
     instance = [
-            token.text.lower()
-            for token in NLP(sent)
-            if not token.is_space
-            ]
+        token.text.lower()
+        for token in NLP(sent)
+        if not token.is_space
+    ]
     return instance
 
 
@@ -47,9 +47,9 @@ def build_vocab(tokens, cache='vocab.pkl', max_size=500000):
 def postprocess(t2i, unk_index):
     def _f(x):
         return {
-                'id': x[0],
-                'tokens': [t2i.get(token, unk_index) for token in x[1]]
-                }
+            'id': x[0],
+            'tokens': [t2i.get(token, unk_index) for token in x[1]]
+        }
     return _f
 
 
@@ -60,16 +60,13 @@ def build(datapath='./data/example.txt', savedir='./'):
     docs = lf.TextDataset(str(datapath))
     ids = lf.Dataset(range(len(docs)))
     docs = docs.map(preprocess)
-    ds = []
-    for _doc, _id in zip(docs, ids):
-        ds.append((_id, _doc))
-    ds = lf.Dataset(ds)
+    ds = lf.zip(ids, docs)
 
     tokens = lf.flat_map(
-            lambda x: x[1],
-            ds,
-            lazy=True
-            )
+        lambda x: x[1],
+        ds,
+        lazy=True
+    )
     t2i, words = build_vocab(tokens, str(savedir / 'vocab.pkl'))
 
     unk_index = t2i[UNK_TOKEN]
