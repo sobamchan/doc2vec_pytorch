@@ -60,7 +60,7 @@ def build(datapath='./data/example.txt', savedir='./'):
     docs = lf.TextDataset(str(datapath))
     ids = lf.Dataset(range(len(docs)))
     docs = docs.map(preprocess)
-    ds = lf.zip(docs, ids)
+    ds = lf.zip(ids, docs)
 
     tokens = lf.flat_map(
         lambda x: x[1],
